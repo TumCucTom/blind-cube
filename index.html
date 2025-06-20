@@ -1,0 +1,841 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rubik's Cube - AnimCubeJS</title>
+    <script src="AnimCube3.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .container {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            max-width: 800px;
+            width: 100%;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .cube-container {
+            display: flex;
+            justify-content: center;
+            margin: 20px 0;
+            min-height: 300px;
+        }
+
+        .controls {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            margin-top: 30px;
+        }
+
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .control-group label {
+            font-weight: bold;
+            color: #555;
+            font-size: 1.1em;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        input[type="text"] {
+            flex: 1;
+            padding: 12px 15px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+        }
+
+        input[type="text"]:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .button-group {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        button {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            min-width: 120px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(245, 87, 108, 0.4);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+        }
+
+        .btn-success:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(79, 172, 254, 0.4);
+        }
+
+        .btn-warning {
+            background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+            color: white;
+        }
+
+        .btn-warning:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(250, 112, 154, 0.4);
+        }
+
+        .info {
+            background: #f8f9fa;
+            border-left: 4px solid #667eea;
+            padding: 15px;
+            border-radius: 0 8px 8px 0;
+            margin-top: 20px;
+        }
+
+        .info h3 {
+            margin: 0 0 10px 0;
+            color: #333;
+        }
+
+        .info p {
+            margin: 5px 0;
+            color: #666;
+            line-height: 1.5;
+        }
+
+        .example-scrambles {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .example-scramble {
+            background: #e9ecef;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-family: monospace;
+            font-size: 14px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .example-scramble:hover {
+            background: #dee2e6;
+        }
+
+        /* Blind Solving Styles */
+        .cube-container {
+            position: relative;
+        }
+
+        .cube-cover {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .cover-content {
+            text-align: center;
+            color: white;
+            padding: 20px;
+        }
+
+        .cover-content h2 {
+            margin: 0 0 15px 0;
+            font-size: 1.8em;
+        }
+
+        .cover-content p {
+            margin: 0;
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .blind-solving-controls {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+            border: 2px solid #e9ecef;
+        }
+
+        .blind-solving-controls h3 {
+            margin: 0 0 15px 0;
+            color: #333;
+            font-size: 1.3em;
+        }
+
+        .blind-controls {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .mode-toggle {
+            display: flex;
+            align-items: center;
+        }
+
+        .toggle-label {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            font-weight: bold;
+            color: #555;
+        }
+
+        .toggle-label input[type="checkbox"] {
+            display: none;
+        }
+
+        .toggle-slider {
+            width: 50px;
+            height: 24px;
+            background: #ccc;
+            border-radius: 12px;
+            position: relative;
+            margin-right: 10px;
+            transition: background 0.3s ease;
+        }
+
+        .toggle-slider:before {
+            content: '';
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            background: white;
+            border-radius: 50%;
+            top: 2px;
+            left: 2px;
+            transition: transform 0.3s ease;
+        }
+
+        .toggle-label input[type="checkbox"]:checked + .toggle-slider {
+            background: #667eea;
+        }
+
+        .toggle-label input[type="checkbox"]:checked + .toggle-slider:before {
+            transform: translateX(26px);
+        }
+
+        .letter-input-section {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .letter-input-section label {
+            font-weight: bold;
+            color: #555;
+            font-size: 1.1em;
+        }
+
+        .letter-input-group {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .letter-input-group input {
+            width: 80px;
+            text-align: center;
+            font-size: 18px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        .letter-input-group button {
+            min-width: 80px;
+            white-space: nowrap;
+        }
+
+        .setup-move-display {
+            background: #e9ecef;
+            padding: 10px;
+            border-radius: 6px;
+            font-family: monospace;
+            font-size: 14px;
+            min-height: 20px;
+            border-left: 4px solid #667eea;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+                margin: 10px;
+            }
+
+            .button-group {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            button {
+                width: 100%;
+                max-width: 300px;
+            }
+
+            .input-group {
+                flex-direction: column;
+                align-items: stretch;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎯 Rubik's Cube Simulator</h1>
+        
+        <div class="cube-container">
+            <div id="cube-display" style="width: 300px; height: 300px;">
+                <script>AnimCube3("buttonbar=1&edit=1&repeat=1&move=&colorscheme=wyorgb")</script>
+            </div>
+            <div id="cube-cover" class="cube-cover" style="display: none;">
+                <div class="cover-content">
+                    <h2>🎯 Blind Solving Mode</h2>
+                    <p>Cube is hidden. Use letter input below to execute setup moves.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="controls">
+            <div class="control-group">
+                <label for="scramble-input">Custom Scramble:</label>
+                <div class="input-group">
+                    <input type="text" id="scramble-input" placeholder="Enter scramble (e.g., R U R' U')" />
+                    <button class="btn-primary" onclick="applyCustomScramble()">Apply</button>
+                </div>
+                <div class="example-scrambles">
+                    <div class="example-scramble" onclick="setScramble('R U R\' U\'')">R U R' U'</div>
+                    <div class="example-scramble" onclick="setScramble('F R U R\' U\' F\'')">F R U R' U' F'</div>
+                    <div class="example-scramble" onclick="setScramble('R U R\' F R F\'')">R U R' F R F'</div>
+                    <div class="example-scramble" onclick="setScramble('L\' U\' L U L F\' L\' F')">L' U' L U L F' L' F</div>
+                </div>
+            </div>
+
+            <div class="button-group">
+                <button class="btn-secondary" onclick="generateRandomScramble()">🎲 Random Scramble</button>
+                <button class="btn-success" onclick="resetCube()">🔄 Reset Cube</button>
+                <button class="btn-warning" onclick="solveCube()">✅ Solve Cube</button>
+            </div>
+
+            <div class="button-group">
+                <button class="btn-primary" onclick="applyTPerm()">🔄 T Perm (Edges)</button>
+                <button class="btn-primary" onclick="applyYPerm()">🔄 Y Perm (Corners) (old pochman method)</button>
+                <button class="btn-primary" onclick="applyFullParity()">🔄 Full Parity</button>
+            </div>
+
+            <!-- Blind Solving Controls -->
+            <div class="blind-solving-controls">
+                <h3>🕶️ Blind Solving Mode</h3>
+                <div class="blind-controls">
+                    <button id="blind-toggle" class="btn-secondary" onclick="toggleBlindMode()">👁️ Start Blind Mode</button>
+                    <div class="mode-toggle">
+                        <label class="toggle-label">
+                            <input type="checkbox" id="corner-mode" onchange="updateMode()">
+                            <span class="toggle-slider"></span>
+                            <span class="toggle-text">Corner Mode</span>
+                        </label>
+                    </div>
+                </div>
+                
+                <div class="letter-input-section">
+                    <label for="letter-input">Letter Input (A-X):</label>
+                    <div class="letter-input-group">
+                        <input type="text" id="letter-input" maxlength="1" placeholder="Type letter" onkeyup="handleLetterInput(event)" />
+                        <button class="btn-primary" onclick="executeSetupMove()">Execute</button>
+                        <button class="btn-secondary" onclick="clearLetterInput()">Clear</button>
+                        <button class="btn-warning" onclick="undoLastSetupMove()">↩️ Undo</button>
+                    </div>
+                    <div id="setup-move-display" class="setup-move-display"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="info">
+            <h3>📖 How to Use</h3>
+            <p><strong>Custom Scramble:</strong> Enter standard Rubik's cube notation (R, L, U, D, F, B) with modifiers (', 2) to create custom scrambles.</p>
+            <p><strong>Random Scramble:</strong> Generates a random scramble sequence automatically.</p>
+            <p><strong>Reset Cube:</strong> Returns the cube to its solved state.</p>
+            <p><strong>Solve Cube:</strong> Automatically solves the cube from its current state.</p>
+            <p><strong>Mouse/Touch:</strong> Click and drag to rotate the cube view, or click on faces to perform moves.</p>
+        </div>
+    </div>
+
+    <script>
+        // Global variable to store the current cube instance and scramble sequence
+        let currentCube = null;
+        let currentScramble = '';
+
+        // Central function to update the cube's state and appearance
+        function updateCube(scramble, append = false) {
+            if (append) {
+                currentScramble = currentScramble ? currentScramble + ' ' + scramble : scramble;
+            } else {
+                currentScramble = scramble;
+            }
+
+            document.getElementById('scramble-input').value = currentScramble;
+
+            const cubeContainer = document.getElementById('cube-display');
+            cubeContainer.innerHTML = '';
+            
+            const script = document.createElement('script');
+            const params = `buttonbar=1&edit=1&repeat=1&move=${encodeURIComponent(currentScramble)}`;
+            script.textContent = `AnimCube3("${params}")`;
+            cubeContainer.appendChild(script);
+
+            // Start animation, with retries to ensure cube is ready
+            setTimeout(() => {
+                let retries = 0;
+                const tryAnimation = () => {
+                    if (typeof acjs_cube !== 'undefined' && acjs_cube[0] && typeof acjs_cube[0].startAnimation === 'function') {
+                        currentCube = acjs_cube[0];
+                        currentCube.startAnimation(0);
+                    } else if (retries < 5) {
+                        retries++;
+                        setTimeout(tryAnimation, 300);
+                    }
+                };
+                tryAnimation();
+            }, 500);
+        }
+
+        // Function to set scramble in input field
+        function setScramble(scramble) {
+            document.getElementById('scramble-input').value = scramble;
+        }
+
+        // Function to apply custom scramble from the input box
+        function applyCustomScramble() {
+            const scrambleFromInput = document.getElementById('scramble-input').value.trim();
+            updateCube(scrambleFromInput, false); // Replace current scramble
+        }
+
+        // Function to generate random scramble
+        function generateRandomScramble() {
+            const moves = ['R', 'L', 'U', 'D', 'F', 'B'];
+            const modifiers = ['', "'", '2'];
+            let scramble = '';
+            
+            for (let i = 0; i < 20; i++) {
+                const move = moves[Math.floor(Math.random() * moves.length)];
+                const modifier = modifiers[Math.floor(Math.random() * modifiers.length)];
+                scramble += move + modifier + ' ';
+            }
+            
+            updateCube(scramble.trim(), false); // Replace current scramble
+        }
+
+        // Function to reset cube to solved state
+        function resetCube() {
+            updateCube('', false); // Replace with empty scramble
+            // Clear setup move history when resetting
+            setupMoveHistory = [];
+        }
+
+        // Function to solve cube (this is a simplified version)
+        function solveCube() {
+            alert('Solving functionality would require implementing a solving algorithm. For now, the cube has been reset to solved state.');
+            resetCube();
+        }
+
+        // Function to apply T Perm (for edges)
+        function applyTPerm() {
+            const tPerm = "R U R' U' R' F R2 U' R' U' R U R' F'";
+            applyAlgorithmToCurrentState(tPerm);
+        }
+
+        // Function to apply Y Perm (for corners)
+        function applyYPerm() {
+            const yPerm = "R U' R' U' R U R' F' R U R' U' R' F R";
+            applyAlgorithmToCurrentState(yPerm);
+        }
+
+        // Function to apply Full Parity
+        function applyFullParity() {
+            const fullParity = "R U R' F' R U2 R' U2 R' F R U R U2 R' U'";
+            applyAlgorithmToCurrentState(fullParity);
+        }
+
+        // Function to apply algorithm to current cube state
+        function applyAlgorithmToCurrentState(algorithm) {
+            // Get the current scramble from input field
+            const currentScramble = document.getElementById('scramble-input').value.trim();
+            
+            // Set the combined scramble in the input field
+            const combinedScramble = currentScramble ? currentScramble + ' ' + algorithm : algorithm;
+            setScramble(combinedScramble);
+            
+            // Reload the cube with initmove for current state and move for new algorithm
+            const cubeContainer = document.getElementById('cube-display');
+            cubeContainer.innerHTML = '';
+            
+            // Create new script element with initmove for current state and move for new algorithm
+            const script = document.createElement('script');
+            const params = currentScramble ? 
+                `buttonbar=1&edit=1&repeat=1&initmove=${encodeURIComponent(currentScramble)}&move=${encodeURIComponent(algorithm)}&colorscheme=wyorgb` :
+                `buttonbar=1&edit=1&repeat=1&move=${encodeURIComponent(algorithm)}&colorscheme=wyorgb`;
+            script.textContent = `AnimCube3("${params}")`;
+            cubeContainer.appendChild(script);
+            
+            // Update current cube reference and start animation
+            setTimeout(() => {
+                if (typeof acjs_cube !== 'undefined' && acjs_cube[0]) {
+                    currentCube = acjs_cube[0];
+                    // Start the animation to play the algorithm
+                    if (typeof currentCube.startAnimation === 'function') {
+                        currentCube.startAnimation(0); // 0 = forward direction
+                    }
+                } else {
+                    // Retry if cube isn't ready yet
+                    setTimeout(() => {
+                        if (typeof acjs_cube !== 'undefined' && acjs_cube[0]) {
+                            currentCube = acjs_cube[0];
+                            if (typeof currentCube.startAnimation === 'function') {
+                                currentCube.startAnimation(0);
+                            }
+                        }
+                    }, 300);
+                }
+            }, 500);
+        }
+
+        // Add keyboard shortcuts
+        document.addEventListener('keydown', function(event) {
+            // Ctrl/Cmd + Enter to apply scramble
+            if ((event.ctrlKey || event.metaKey) && event.key === 'Enter') {
+                event.preventDefault();
+                applyCustomScramble();
+            }
+            
+            // Ctrl/Cmd + R to generate random scramble
+            if ((event.ctrlKey || event.metaKey) && event.key === 'r') {
+                event.preventDefault();
+                generateRandomScramble();
+            }
+            
+            // Ctrl/Cmd + Z to reset cube
+            if ((event.ctrlKey || event.metaKey) && event.key === 'z') {
+                event.preventDefault();
+                resetCube();
+            }
+        });
+
+        // Add some example scrambles for quick access
+        const exampleScrambles = [
+            "R U R' U'",
+            "F R U R' U' F'",
+            "R U R' F R F'",
+            "L' U' L U L F' L' F",
+            "R U2 R' U' R U' R'",
+            "F R U' R' U' R U R' F'",
+            "R U R' U R U2 R'",
+            "L' U' L U' L' U2 L"
+        ];
+
+        // Blind Solving Variables
+        let isBlindMode = false;
+        let isCornerMode = false;
+        let currentLetter = '';
+        let setupMoveHistory = []; // Track executed setup moves for undo
+
+        // Setup moves for blind solving
+        const edgeSetupMoves = {
+            'A': "Lw2 D' L2",
+            'B': "buffer", // Can't swap with buffer
+            'C': "Lw2 D L2",
+            'D': "", // No setup moves
+            'E': "L Dw' L",
+            'F': "Dw' L",
+            'G': "L' Dw' L",
+            'H': "Dw L'",
+            'I': "Lw D' L2",
+            'J': "Dw2 L",
+            'K': "Lw D L2",
+            'L': "L'",
+            'M': "buffer", // Can't swap with buffer
+            'N': "Dw L",
+            'O': "D2 L' Dw' L",
+            'P': "Dw' L'",
+            'Q': "Lw' D L2",
+            'R': "L",
+            'S': "Lw' D' L2",
+            'T': "Dw2 L'",
+            'U': "D' L2",
+            'V': "D2 L2",
+            'W': "D L2",
+            'X': "L2"
+        };
+
+        const cornerSetupMoves = {
+            'A': "buffer", // Can't swap with buffer
+            'B': "R2",
+            'C': "F2 D",
+            'D': "F2",
+            'E': "buffer", // Can't swap with buffer
+            'F': "F' D",
+            'G': "F'",
+            'H': "D' R",
+            'I': "F R'",
+            'J': "R'",
+            'K': "F' R'",
+            'L': "F2 R'",
+            'M': "F",
+            'N': "R' F",
+            'O': "R2 F",
+            'P': "R F",
+            'Q': "R D'",
+            'R': "buffer", // Can't swap with buffer
+            'S': "D F'",
+            'T': "R",
+            'U': "D",
+            'V': "", // No setup moves
+            'W': "D'",
+            'X': "D2"
+        };
+
+        // Function to calculate inverse of a move sequence
+        function getInverseMoves(moves) {
+            if (!moves || moves.trim() === '') return '';
+            
+            const moveArray = moves.trim().split(' ').filter(move => move !== '');
+            const inverseArray = moveArray.reverse().map(move => {
+                if (move.includes("2")) {
+                    return move; // Double moves are their own inverse
+                } else if (move.includes("'")) {
+                    return move.replace("'", ""); // Remove prime
+                } else {
+                    return move + "'"; // Add prime
+                }
+            });
+            
+            return inverseArray.join(' ');
+        }
+
+        // Function to toggle blind mode
+        function toggleBlindMode() {
+            isBlindMode = !isBlindMode;
+            const cover = document.getElementById('cube-cover');
+            const toggleBtn = document.getElementById('blind-toggle');
+            
+            if (isBlindMode) {
+                cover.style.display = 'flex';
+                toggleBtn.textContent = '👁️ Show Cube';
+                toggleBtn.className = 'btn-success';
+            } else {
+                cover.style.display = 'none';
+                toggleBtn.textContent = '🕶️ Start Blind Mode';
+                toggleBtn.className = 'btn-secondary';
+            }
+        }
+
+        // Function to update mode (edge/corner)
+        function updateMode() {
+            isCornerMode = document.getElementById('corner-mode').checked;
+            updateSetupMoveDisplay();
+        }
+
+        // Function to handle letter input
+        function handleLetterInput(event) {
+            const input = event.target;
+            const letter = input.value.toUpperCase();
+            
+            // Only allow A-X
+            if (letter && /^[A-X]$/.test(letter)) {
+                currentLetter = letter;
+                updateSetupMoveDisplay();
+            } else if (letter) {
+                input.value = '';
+                currentLetter = '';
+                updateSetupMoveDisplay();
+            }
+        }
+
+        // Function to update setup move display
+        function updateSetupMoveDisplay() {
+            const display = document.getElementById('setup-move-display');
+            const modeText = isCornerMode ? 'Corner' : 'Edge';
+            
+            if (!currentLetter) {
+                display.textContent = `Select ${modeText} Mode - Type a letter (A-X)`;
+                return;
+            }
+            
+            const setupMoves = isCornerMode ? cornerSetupMoves : edgeSetupMoves;
+            const setupMove = setupMoves[currentLetter];
+            
+            if (setupMove === 'buffer') {
+                display.textContent = `${modeText} ${currentLetter}: BUFFER PIECE (cannot swap)`;
+            } else if (setupMove === '') {
+                display.textContent = `${modeText} ${currentLetter}: No setup moves needed`;
+            } else {
+                display.textContent = `${modeText} ${currentLetter}: ${setupMove}`;
+            }
+        }
+
+        // Function to execute setup move
+        function executeSetupMove() {
+            if (!currentLetter) {
+                alert('Please enter a letter first!');
+                return;
+            }
+            
+            const setupMoves = isCornerMode ? cornerSetupMoves : edgeSetupMoves;
+            const setupMove = setupMoves[currentLetter];
+            
+            if (setupMove === 'buffer') {
+                alert('Cannot swap with buffer piece!');
+                return;
+            }
+            
+            if (setupMove === '') {
+                alert('No setup moves needed for this piece!');
+                return;
+            }
+            
+            // Add the setup move to history for undo functionality
+            setupMoveHistory.push(setupMove);
+            
+            // Apply the setup move
+            applyAlgorithmToCurrentState(setupMove);
+            
+            // Clear the letter input after execution
+            clearLetterInput();
+        }
+
+        // Function to clear letter input
+        function clearLetterInput() {
+            document.getElementById('letter-input').value = '';
+            currentLetter = '';
+            updateSetupMoveDisplay();
+        }
+
+        // Function to undo the last setup move
+        function undoLastSetupMove() {
+            console.log('Undo button clicked!'); // Debug log
+            console.log('Setup move history:', setupMoveHistory); // Debug log
+            
+            if (setupMoveHistory.length === 0) {
+                alert('No moves to undo!');
+                return;
+            }
+            
+            const lastMove = setupMoveHistory.pop();
+            const inverseMoves = getInverseMoves(lastMove);
+            
+            console.log('Last move:', lastMove); // Debug log
+            console.log('Inverse moves:', inverseMoves); // Debug log
+            
+            if (inverseMoves) {
+                // Apply the inverse moves to undo the last setup move
+                applyAlgorithmToCurrentState(inverseMoves);
+                
+                // Update the display to show what was undone
+                const display = document.getElementById('setup-move-display');
+                const modeText = isCornerMode ? 'Corner' : 'Edge';
+                display.textContent = `Undid: ${modeText} setup move (${inverseMoves})`;
+                
+                // Clear the display after 2 seconds
+                setTimeout(() => {
+                    updateSetupMoveDisplay();
+                }, 2000);
+            }
+        }
+
+        // Populate example scrambles
+        document.addEventListener('DOMContentLoaded', function() {
+            const exampleContainer = document.querySelector('.example-scrambles');
+            exampleContainer.innerHTML = '';
+            
+            exampleScrambles.forEach(scramble => {
+                const div = document.createElement('div');
+                div.className = 'example-scramble';
+                div.textContent = scramble;
+                div.onclick = () => setScramble(scramble);
+                exampleContainer.appendChild(div);
+            });
+
+            // Initialize blind solving display
+            updateSetupMoveDisplay();
+            
+            // Debug: Check if undo button exists
+            const undoButton = document.querySelector('button[onclick="undoLastSetupMove()"]');
+            console.log('Undo button found:', undoButton);
+            if (undoButton) {
+                console.log('Undo button text:', undoButton.textContent);
+                console.log('Undo button style:', undoButton.style.display);
+                undoButton.style.border = '2px solid red'; // Temporary visual debug
+            }
+        });
+    </script>
+</body>
+</html>
