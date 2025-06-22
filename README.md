@@ -11,8 +11,11 @@ A comprehensive Rubik's Cube simulator with advanced blind solving capabilities,
 
 ## 📸 Demo Screenshots
 
-### Main Interface
-![Main Interface](helper.jpeg)
+[Demo Video](https://drive.google.com/file/d/1w3kQZVslqpBoXh6jznfl9kXRLrkXlmxC/view?usp=drive_link)
+![interface](docs/bld.png)
+![interface](docs/bld1.png)
+
+
 
 ### Blind Solving Mode
 - **Cube Hidden**: The cube is completely covered during blind solving practice
