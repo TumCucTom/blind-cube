@@ -8,6 +8,7 @@ A comprehensive Rubik's Cube simulator with advanced blind solving capabilities,
 ## 🚀 Live Demo
 
 **🌐 Visit the live application:** [https://bld-cube.thomasbale.com](https://bld-cube.thomasbale.com)
+
 **See the [Demo Video](https://drive.google.com/file/d/1w3kQZVslqpBoXh6jznfl9kXRLrkXlmxC/view?usp=drive_link)**
 
 ## 📸 Demo Screenshots
